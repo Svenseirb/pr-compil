@@ -31,6 +31,7 @@ int pow(int a,int b){
   return res;
 }
 
+<<<<<<< HEAD
 int abs(int a){
   if(a < 0)
     return -a;
@@ -43,6 +44,16 @@ int hash(char *id){
   c = *id;
   while(c != '\0'){
     code = code + c*pow(31,i);
+=======
+unsigned int hash(char *id){
+  int a;
+  char c;
+  unsigned int code = 0, i = 0;
+  c = id[i];
+  while(c != '\0'){
+    a = (int)c;
+    code = code + a*pow(22,i);
+>>>>>>> b4d7d3112176ed7780fa76424d60971bb44c63f5
     i++;
     c = id[i];
   }
@@ -51,15 +62,23 @@ int hash(char *id){
 
 void hashtab_add(Hashtab *htab, char *id, int reg){
   int code = hash(id);
+<<<<<<< HEAD
   code = abs(code);
   code %= htab->tmax;
+=======
+  code = code%htab->tmax;
+>>>>>>> b4d7d3112176ed7780fa76424d60971bb44c63f5
   htab->tab[code] = reg;
 }
 
 int hashtab_get(Hashtab *htab, char *id){
   int code = hash(id);
+<<<<<<< HEAD
   code = abs(code);
   code %= htab->tmax;
+=======
+  code = code%htab->tmax;
+>>>>>>> b4d7d3112176ed7780fa76424d60971bb44c63f5
   return htab->tab[code];
 }
 
