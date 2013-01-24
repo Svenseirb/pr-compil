@@ -24,33 +24,41 @@ Hashtab *hashtab_create(){
   free(htab);
 }
 
-int pow(int a, int b){
+int pow(int a,int b){
   int res = 1, i;
   for(i = 0; i<b; i++)
     res = res*a;
   return res;
 }
 
-unsigned int hash(char *id){
+int abs(int a){
+  if(a < 0)
+    return -a;
+  return a;
+}
+
+int hash(char *id){
   char c;
-  unsigned int code = 0, i = 0;
+  int code = 0, i = 0;
   c = *id;
   while(c != '\0'){
-    code = code + (unsigned int)c*pow(31,i);
+    code = code + c*pow(31,i);
     i++;
-    c = *(id+i);
+    c = id[i];
   }
   return code;
 }
 
 void hashtab_add(Hashtab *htab, char *id, int reg){
   int code = hash(id);
+  code = abs(code);
   code %= htab->tmax;
   htab->tab[code] = reg;
 }
 
 int hashtab_get(Hashtab *htab, char *id){
   int code = hash(id);
+  code = abs(code);
   code %= htab->tmax;
   return htab->tab[code];
 }
@@ -61,8 +69,8 @@ int main(){
   hashtab_add(htab, "bla", 1);
   hashtab_add(htab, "bal", 2);
   hashtab_add(htab, "lab", 3);
-  hashtab_add(htab, "identfiant_random", 4);
-  printf("%d, %d, %d, %d\n", hashtab_get(htab, "bla"), hashtab_get(htab, "bal"), hashtab_get(htab, "lab"), hashtab_get(htab, "identfiant_random"));
+  hashtab_add(htab, "identfiant_random_tres_tres_long_qui_prend_beaucoup_de_place_et_qui_risque_de_faire_bugger_la_table_de_hachage_et_qui_nezldazldkjzldjehldehflehldjzljdilzidlefliezfsdfjzeljdlzejlezjfelqhfehqlfkheqkllfhlekjhfqjehsflkheqkjfhekjqhflekjqemqfsldsfqjesdlfkjmqeslkfjmqeislmdfjmilesmdmlsdnmfnqesdkjfrsjdfneqsfdcjeqbfkqr", 4);
+  printf("%d, %d, %d, %d \n", hashtab_get(htab, "bla"), hashtab_get(htab, "bal"), hashtab_get(htab, "lab"), hashtab_get(htab, "identfiant_random_tres_tres_long_qui_prend_beaucoup_de_place_et_qui_risque_de_faire_bugger_la_table_de_hachage_et_qui_nezldazldkjzldjehldehflehldjzljdilzidlefliezfsdfjzeljdlzejlezjfelqhfehqlfkheqkllfhlekjhfqjehsflkheqkjfhekjqhflekjqemqfsldsfqjesdlfkjmqeslkfjmqeislmdfjmilesmdmlsdnmfnqesdkjfrsjdfneqsfdcjeqbfkqr"));
   hashtab_delete(htab);
   return 0;
 }
