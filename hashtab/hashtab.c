@@ -7,16 +7,20 @@ typedef struct Hashtab{
   int taille;
 }Hashtab;
 
-Hashtab *hashtab_create(){
+Hashtab *hashtab_create_taille(int size){
   int i;
   Hashtab *htab = malloc(sizeof(Hashtab));
-  htab->tab = malloc(256*sizeof(int));
-  for(i=0; i<256; i++){
+  htab->tab = malloc(size*sizeof(int));
+  for(i=0; i<size; i++){
     htab->tab[i] = -1;
   }
-  htab->tmax = 256;
+  htab->tmax = size;
   htab->taille = 0;
   return htab;
+}
+
+Hashtab *hashtab_create(){
+  return *hashtab_create_taille(256);
 }
 
  void hashtab_delete(Hashtab *htab){
@@ -31,7 +35,6 @@ int pow(int a,int b){
   return res;
 }
 
-<<<<<<< HEAD
 int abs(int a){
   if(a < 0)
     return -a;
@@ -44,16 +47,6 @@ int hash(char *id){
   c = *id;
   while(c != '\0'){
     code = code + c*pow(31,i);
-=======
-unsigned int hash(char *id){
-  int a;
-  char c;
-  unsigned int code = 0, i = 0;
-  c = id[i];
-  while(c != '\0'){
-    a = (int)c;
-    code = code + a*pow(22,i);
->>>>>>> b4d7d3112176ed7780fa76424d60971bb44c63f5
     i++;
     c = id[i];
   }
@@ -62,23 +55,18 @@ unsigned int hash(char *id){
 
 void hashtab_add(Hashtab *htab, char *id, int reg){
   int code = hash(id);
-<<<<<<< HEAD
   code = abs(code);
   code %= htab->tmax;
-=======
-  code = code%htab->tmax;
->>>>>>> b4d7d3112176ed7780fa76424d60971bb44c63f5
-  htab->tab[code] = reg;
+  if(htab->tab[code]==-1){
+    htab->taille++;
+    htab->tab[code] = reg;
+  }
 }
 
 int hashtab_get(Hashtab *htab, char *id){
   int code = hash(id);
-<<<<<<< HEAD
   code = abs(code);
   code %= htab->tmax;
-=======
-  code = code%htab->tmax;
->>>>>>> b4d7d3112176ed7780fa76424d60971bb44c63f5
   return htab->tab[code];
 }
 
