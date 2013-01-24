@@ -32,26 +32,28 @@ int pow(int a, int b){
 }
 
 unsigned int hash(char *id){
+  int a;
   char c;
   unsigned int code = 0, i = 0;
-  c = *id;
+  c = id[i];
   while(c != '\0'){
-    code = code + (unsigned int)c*pow(31,i);
+    a = (int)c;
+    code = code + a*pow(22,i);
     i++;
-    c = *(id+i);
+    c = id[i];
   }
   return code;
 }
 
 void hashtab_add(Hashtab *htab, char *id, int reg){
   int code = hash(id);
-  code %= htab->tmax;
+  code = code%htab->tmax;
   htab->tab[code] = reg;
 }
 
 int hashtab_get(Hashtab *htab, char *id){
   int code = hash(id);
-  code %= htab->tmax;
+  code = code%htab->tmax;
   return htab->tab[code];
 }
 
