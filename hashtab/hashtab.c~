@@ -1,0 +1,40 @@
+#include <stdlib.h>
+#include <stdio.h>
+
+typedef struct Hashtab{
+  int *tab;
+  int tmax;
+  int taille;
+}Hashtab;
+
+Hashtab *hashtab_create(){
+  Hashtab *hash = malloc(sizeof(Hashtab));
+  hash->tab = malloc(256*sizeof(int));
+  hash->tmax = 256;
+  hash->taille = 0;
+  return hash;
+}
+
+int pow(int a, int b){
+  int res = 1, i;
+  for(i = 0; i<b; i++)
+    res = res*a;
+  return res;
+}
+
+unsigned int hash(char *id){
+  char c;
+  unsigned int code = 0, i = 0;
+  c = *id;
+  while(c != '\0'){
+    code = code + (unsigned int)c*pow(31,i);
+    i++;
+    c = *(id+i);
+  }
+  return code;
+}
+
+int main(){
+  printf("%d, %d, %d\n", hash("bla"), hash("alb"), hash("identfiant_random"));
+  return 0;
+}
