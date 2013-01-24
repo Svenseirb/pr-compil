@@ -963,7 +963,7 @@ YY_RULE_SETUP
 case 33:
 YY_RULE_SETUP
 #line 63 "scanner.l"
-{ count(); return(ID); }
+{yylval = yytext; count(); return(ID); }
 	YY_BREAK
 case 34:
 /* rule 34 can match eol */

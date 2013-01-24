@@ -1,11 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-
-typedef struct Hashtab{
-  int *tab;
-  int tmax;
-  int taille;
-}Hashtab;
+#include "hashtab.h"
 
 Hashtab *hashtab_create_taille(int size){
   int i;
@@ -20,10 +15,10 @@ Hashtab *hashtab_create_taille(int size){
 }
 
 Hashtab *hashtab_create(){
-  return *hashtab_create_taille(256);
+  return hashtab_create_taille(256);
 }
 
- void hashtab_delete(Hashtab *htab){
+void hashtab_delete(Hashtab *htab){
   free(htab->tab);
   free(htab);
 }
@@ -46,7 +41,7 @@ int hash(char *id){
   int code = 0, i = 0;
   c = *id;
   while(c != '\0'){
-    code = code + c*pow(31,i);
+    code = code + c*pow(7,i);
     i++;
     c = id[i];
   }
@@ -70,14 +65,3 @@ int hashtab_get(Hashtab *htab, char *id){
   return htab->tab[code];
 }
 
-int main(){
-  printf("%d, %d, %d\n", hash("bla"), hash("alb"), hash("identfiant_random"));
-  Hashtab *htab = hashtab_create();
-  hashtab_add(htab, "bla", 1);
-  hashtab_add(htab, "bal", 2);
-  hashtab_add(htab, "lab", 3);
-  hashtab_add(htab, "identfiant_random_tres_tres_long_qui_prend_beaucoup_de_place_et_qui_risque_de_faire_bugger_la_table_de_hachage_et_qui_nezldazldkjzldjehldehflehldjzljdilzidlefliezfsdfjzeljdlzejlezjfelqhfehqlfkheqkllfhlekjhfqjehsflkheqkjfhekjqhflekjqemqfsldsfqjesdlfkjmqeslkfjmqeislmdfjmilesmdmlsdnmfnqesdkjfrsjdfneqsfdcjeqbfkqr", 4);
-  printf("%d, %d, %d, %d \n", hashtab_get(htab, "bla"), hashtab_get(htab, "bal"), hashtab_get(htab, "lab"), hashtab_get(htab, "identfiant_random_tres_tres_long_qui_prend_beaucoup_de_place_et_qui_risque_de_faire_bugger_la_table_de_hachage_et_qui_nezldazldkjzldjehldehflehldjzljdilzidlefliezfsdfjzeljdlzejlezjfelqhfehqlfkheqkllfhlekjhfqjehsflkheqkjfhekjqhflekjqemqfsldsfqjesdlfkjmqeslkfjmqeislmdfjmilesmdmlsdnmfnqesdkjfrsjdfneqsfdcjeqbfkqr"));
-  hashtab_delete(htab);
-  return 0;
-}
