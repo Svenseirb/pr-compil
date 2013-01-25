@@ -203,7 +203,7 @@ typedef union YYSTYPE
 
   int nombre;
   char *chaine;
-  float flotant;
+  float flottant;
   struct mix{int nombre;
   char *chaine;
 }mix;
@@ -536,11 +536,19 @@ static const yytype_int8 yyrhs[] =
 static const yytype_uint16 yyrline[] =
 {
        0,    65,    65,    67,    68,    69,    71,    72,    73,    76,
+<<<<<<< HEAD
       77,    78,    81,    82,    83,    84,    85,    87,    88,    91,
       92,    93,    95,    96,    98,   100,   101,   103,   104,   108,
      117,   119,   125,   131,   137,   141,   142,   143,   147,   154,
      155,   156,   157,   158,   159,   163,   165,   189,   208,   232,
      248,   253,   254,   257,   258,   259,   260,   263,   264
+=======
+      77,    78,    81,    82,    83,    84,    85,   101,   102,   105,
+     106,   107,   109,   110,   112,   116,   117,   119,   120,   124,
+     133,   135,   141,   147,   153,   157,   158,   159,   163,   172,
+     173,   174,   175,   176,   177,   181,   183,   219,   250,   286,
+     314,   319,   320,   323,   324,   325,   326,   329,   330
+>>>>>>> 7e1c70bb3675db958ab77e8f262d1a7c572feb99
 };
 #endif
 
@@ -1569,22 +1577,38 @@ yyreduce:
 
 /* Line 1806 of yacc.c  */
 #line 86 "parse.y"
-    {hashtab_addreg(htab,(yyvsp[(1) - (3)].mix).chaine,reg-1); hashtab_addtype(htab,(yyvsp[(1) - (3)].mix).chaine, (yyvsp[(3) - (3)].mix).chaine); regtoid[reg-1]=strdup((yyvsp[(1) - (3)].mix).chaine);}
+    {
+  int tmpreg;
+  tmpreg = hashtab_getreg(htab, (yyvsp[(1) - (3)].mix).chaine);
+  if(tmpreg != -1){
+    if(strcmp(hashtab_gettype(htab, (yyvsp[(1) - (3)].mix).chaine),(yyvsp[(3) - (3)].mix).chaine) !=0){
+      error("Mauvais type assigne a la variable");
+    }
+    free(regtoid[tmpreg]);
+  }
+  else{ 
+    hashtab_addtype(htab,(yyvsp[(1) - (3)].mix).chaine, (yyvsp[(3) - (3)].mix).chaine); 
+  }
+  hashtab_addreg(htab,(yyvsp[(1) - (3)].mix).chaine,reg-1); 
+  regtoid[reg-1]=strdup((yyvsp[(1) - (3)].mix).chaine);
+  }
     break;
 
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 99 "parse.y"
-    {(yyval.mix).chaine = malloc(strlen((yyvsp[(1) - (1)].chaine))*sizeof(char));  idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
+#line 113 "parse.y"
+    {
+(yyval.mix).chaine = malloc(strlen((yyvsp[(1) - (1)].chaine))*sizeof(char));  
+idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
     break;
 
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 109 "parse.y"
+#line 125 "parse.y"
     {
-  idCopy((yyvsp[(1) - (1)].mix).chaine, (yyvsp[(1) - (1)].mix).chaine); 
+  idCopy((yyvsp[(1) - (1)].mix).chaine, (yyvsp[(1) - (1)].mix).chaine);
   (yyval.mix).nombre = hashtab_getreg(htab,(yyvsp[(1) - (1)].mix).chaine);
   (yyval.mix).chaine = hashtab_gettype(htab,(yyvsp[(1) - (1)].mix).chaine);
   if((yyval.mix).nombre == -1){
@@ -1596,25 +1620,25 @@ yyreduce:
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 118 "parse.y"
+#line 134 "parse.y"
     {/*$$.nombre = reg; clean_string((char *)$1); len_string = strlen((char *)$1) + 1; printf("\%r%d = internal constant [%d x i8] c\"%s\\00\"\n", reg, len_string, (char *)$1); reg++;*/}
     break;
 
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 120 "parse.y"
+#line 136 "parse.y"
     {(yyval.mix).nombre = reg;
   (yyval.mix).chaine = malloc(6*sizeof(char));
   (yyval.mix).chaine = "float"; 
-  printf("\%r%d = fadd float 0.0, %f\n", reg, (yyvsp[(1) - (1)].flotant)); 
+  printf("\%r%d = fadd float 0.0, %f\n", reg, (yyvsp[(1) - (1)].flottant)); 
   reg++;}
     break;
 
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 126 "parse.y"
+#line 142 "parse.y"
     {(yyval.mix).nombre = reg; 
   (yyval.mix).chaine = malloc(4*sizeof(char));
   (yyval.mix).chaine = "int";
@@ -1625,28 +1649,63 @@ yyreduce:
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 132 "parse.y"
+#line 148 "parse.y"
     {(yyval.mix).nombre = reg; 
   (yyval.mix).chaine = malloc(5*sizeof(char));
   (yyval.mix).chaine = "bool";
-  printf("\%r%d = add i32 0, %d\n", reg, (yyvsp[(1) - (1)].nombre)); 
+  printf("\%r%d = add i1 0, %d\n", reg, (yyvsp[(1) - (1)].nombre)); 
   reg++;}
+    break;
+
+  case 38:
+
+/* Line 1806 of yacc.c  */
+#line 164 "parse.y"
+    {
+  
+  (yyval.mix).nombre = reg;
+  (yyval.mix).chaine = malloc(5*sizeof(char));
+  (yyval.mix).chaine = "bool";
+  printf("\%r%d = icmp ult i32 \%r%d, \%r%d\n",reg, (yyvsp[(1) - (3)].mix).nombre, (yyvsp[(3) - (3)].mix).nombre);
+  reg++;
+  }
     break;
 
   case 45:
 
 /* Line 1806 of yacc.c  */
+<<<<<<< HEAD
 #line 163 "parse.y"
     {(yyval.mix) = (yyvsp[(1) - (1)].mix);}
+=======
+#line 181 "parse.y"
+    {}
+>>>>>>> 7e1c70bb3675db958ab77e8f262d1a7c572feb99
     break;
 
   case 46:
 
 /* Line 1806 of yacc.c  */
+<<<<<<< HEAD
 #line 166 "parse.y"
+=======
+#line 184 "parse.y"
+>>>>>>> 7e1c70bb3675db958ab77e8f262d1a7c572feb99
     {
   (yyval.mix).nombre = reg;
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
+    if(strcmp((yyvsp[(1) - (3)].mix).chaine, "int")==0){
+      int ntemp = (yyvsp[(1) - (3)].mix).nombre;
+      (yyvsp[(1) - (3)].mix).nombre = reg;
+      reg++;
+      printf("\%r%d = sitofp i32 \%r%d to float\n",(yyvsp[(1) - (3)].mix).nombre, ntemp);
+    }
+    if(strcmp((yyvsp[(3) - (3)].mix).chaine, "int")==0){
+      int ntemp = (yyvsp[(3) - (3)].mix).nombre;
+      (yyvsp[(3) - (3)].mix).nombre = reg;
+      reg++;
+      printf("\%r%d = sitofp i32 \%r%d to float\n",(yyvsp[(3) - (3)].mix).nombre, ntemp);
+    }
     (yyval.mix).chaine = malloc(6*sizeof(char));
     (yyval.mix).chaine = "float"; 
     printf("\%r%d = fadd float \%r%d, \%r%d\n",reg, (yyvsp[(1) - (3)].mix).nombre, (yyvsp[(3) - (3)].mix).nombre);
@@ -1654,7 +1713,7 @@ yyreduce:
   else if(strcmp((yyvsp[(1) - (3)].mix).chaine, "bool")==0 && strcmp((yyvsp[(3) - (3)].mix).chaine, "bool")==0){
     (yyval.mix).chaine = malloc(4*sizeof(char));
     (yyval.mix).chaine = "bool";
-    printf("\%r%d = or i32 \%r%d, \%r%d\n",reg, (yyvsp[(1) - (3)].mix).nombre, (yyvsp[(3) - (3)].mix).nombre);
+    printf("\%r%d = or i1 \%r%d, \%r%d\n",reg, (yyvsp[(1) - (3)].mix).nombre, (yyvsp[(3) - (3)].mix).nombre);
   }
   else if(strcmp((yyvsp[(1) - (3)].mix).chaine, "bool")==0 ||  strcmp((yyvsp[(3) - (3)].mix).chaine, "bool")==0){
     error("addition d'un booleen avec un autre type");
@@ -1671,10 +1730,26 @@ yyreduce:
   case 47:
 
 /* Line 1806 of yacc.c  */
+<<<<<<< HEAD
 #line 190 "parse.y"
+=======
+#line 220 "parse.y"
+>>>>>>> 7e1c70bb3675db958ab77e8f262d1a7c572feb99
     {
   (yyval.mix).nombre = reg; 
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
+    if(strcmp((yyvsp[(1) - (3)].mix).chaine, "int")==0){
+      int ntemp = (yyvsp[(1) - (3)].mix).nombre;
+      (yyvsp[(1) - (3)].mix).nombre = reg;
+      reg++;
+      printf("\%r%d = sitofp i32 \%r%d to float\n",(yyvsp[(1) - (3)].mix).nombre, ntemp);
+    }
+    if(strcmp((yyvsp[(3) - (3)].mix).chaine, "int")==0){
+      int ntemp = (yyvsp[(3) - (3)].mix).nombre;
+      (yyvsp[(3) - (3)].mix).nombre = reg;
+      reg++;
+      printf("\%r%d = sitofp i32 \%r%d to float\n",(yyvsp[(3) - (3)].mix).nombre, ntemp);
+    }
     (yyval.mix).chaine = malloc(6*sizeof(char));
     (yyval.mix).chaine = "float"; 
     printf("\%r%d = fsub float \%r%d, \%r%d\n",reg, (yyvsp[(1) - (3)].mix).nombre, (yyvsp[(3) - (3)].mix).nombre);
@@ -1691,10 +1766,26 @@ yyreduce:
   case 48:
 
 /* Line 1806 of yacc.c  */
+<<<<<<< HEAD
 #line 209 "parse.y"
+=======
+#line 251 "parse.y"
+>>>>>>> 7e1c70bb3675db958ab77e8f262d1a7c572feb99
     {
   (yyval.mix).nombre = reg; 
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
+    if(strcmp((yyvsp[(1) - (3)].mix).chaine, "int")==0){
+      int ntemp = (yyvsp[(1) - (3)].mix).nombre;
+      (yyvsp[(1) - (3)].mix).nombre = reg;
+      reg++;
+      printf("\%r%d = sitofp i32 \%r%d to float\n",(yyvsp[(1) - (3)].mix).nombre, ntemp);
+    }
+    if(strcmp((yyvsp[(3) - (3)].mix).chaine, "int")==0){
+      int ntemp = (yyvsp[(3) - (3)].mix).nombre;
+      (yyvsp[(3) - (3)].mix).nombre = reg;
+      reg++;
+      printf("\%r%d = sitofp i32 \%r%d to float\n",(yyvsp[(3) - (3)].mix).nombre, ntemp);
+    }
     (yyval.mix).chaine = malloc(6*sizeof(char));
     (yyval.mix).chaine = "float"; 
     printf("\%r%d = fmul float \%r%d, \%r%d\n",reg, (yyvsp[(1) - (3)].mix).nombre, (yyvsp[(3) - (3)].mix).nombre);
@@ -1702,7 +1793,7 @@ yyreduce:
   else if(strcmp((yyvsp[(1) - (3)].mix).chaine, "bool")==0 && strcmp((yyvsp[(3) - (3)].mix).chaine, "bool")==0){
     (yyval.mix).chaine = malloc(4*sizeof(char));
     (yyval.mix).chaine = "bool";
-    printf("\%r%d = and i32 \%r%d, \%r%d\n",reg, (yyvsp[(1) - (3)].mix).nombre, (yyvsp[(3) - (3)].mix).nombre);
+    printf("\%r%d = and i1 \%r%d, \%r%d\n",reg, (yyvsp[(1) - (3)].mix).nombre, (yyvsp[(3) - (3)].mix).nombre);
   }
   else if(strcmp((yyvsp[(1) - (3)].mix).chaine, "bool")==0 ||  strcmp((yyvsp[(3) - (3)].mix).chaine, "bool")==0){
     error("multiplication d'un booleen avec un autre type");
@@ -1719,10 +1810,26 @@ yyreduce:
   case 49:
 
 /* Line 1806 of yacc.c  */
+<<<<<<< HEAD
 #line 233 "parse.y"
+=======
+#line 287 "parse.y"
+>>>>>>> 7e1c70bb3675db958ab77e8f262d1a7c572feb99
     {
   (yyval.mix).nombre = reg; 
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
+    if(strcmp((yyvsp[(1) - (3)].mix).chaine, "int")==0){
+      int ntemp = (yyvsp[(1) - (3)].mix).nombre;
+      (yyvsp[(1) - (3)].mix).nombre = reg;
+      reg++;
+      printf("\%r%d = sitofp i32 \%r%d to float\n",(yyvsp[(1) - (3)].mix).nombre, ntemp);
+    }
+    if(strcmp((yyvsp[(3) - (3)].mix).chaine, "int")==0){
+      int ntemp = (yyvsp[(3) - (3)].mix).nombre;
+      (yyvsp[(3) - (3)].mix).nombre = reg;
+      reg++;
+      printf("\%r%d = sitofp i32 \%r%d to float\n",(yyvsp[(3) - (3)].mix).nombre, ntemp);
+    }
     (yyval.mix).chaine = malloc(6*sizeof(char));
     (yyval.mix).chaine = "float"; 
     printf("\%r%d = fdiv float \%r%d, \%r%d\n",reg, (yyvsp[(1) - (3)].mix).nombre, (yyvsp[(3) - (3)].mix).nombre);
@@ -1739,14 +1846,18 @@ yyreduce:
   case 50:
 
 /* Line 1806 of yacc.c  */
+<<<<<<< HEAD
 #line 249 "parse.y"
+=======
+#line 315 "parse.y"
+>>>>>>> 7e1c70bb3675db958ab77e8f262d1a7c572feb99
     {(yyval.mix) = (yyvsp[(1) - (1)].mix);}
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 1750 "y.tab.c"
+#line 1828 "y.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1977,12 +2088,36 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
+<<<<<<< HEAD
 #line 268 "parse.y"
+=======
+#line 334 "parse.y"
+
+
+void print_begin() {
+        puts("@str = constant [ 7 x i8 ] c\"=> %d\\0A\\00\"");
+        puts("declare i32 @printf(i8*, ...)\n");
+        puts("define i1 @calcule() {");
+}
+
+void print_end() {
+	printf("ret i1 \%r%d\n", reg-1);
+        puts("}\n");
+        puts("define i32 @main() {");
+        puts("\t%x = call i1 @calcule()");
+        puts("\tcall i32 (i8*, ...)* @printf(i8* getelementptr ([7 x i8]* @str, i32 0, i32 0), i1 %x)");
+        puts("\tret i32 0\n}");
+}
+>>>>>>> 7e1c70bb3675db958ab77e8f262d1a7c572feb99
 
 int main() {
   htab = hashtab_create();
   regtoid = malloc(10000*sizeof(char*));
+
+  print_begin();
   yyparse(); 
+  print_end();
+
   hashtab_delete(htab);
   return 0;
 }

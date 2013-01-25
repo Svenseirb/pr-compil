@@ -99,7 +99,7 @@ typedef union YYSTYPE
 
   int nombre;
   char *chaine;
-  float flotant;
+  float flottant;
   struct mix{int nombre;
   char *chaine;
 }mix;
