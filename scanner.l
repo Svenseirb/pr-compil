@@ -35,14 +35,14 @@ ID ([$@]?[a-zA-Z_][a-zA-Z_0-9]*)
 "false"  { yylval.nombre = 0; count(); return(BOOL); }
 "for"    { count(); return(FOR); }
 "while"  { count(); return(WHILE);}
-"if"     { count(); return(IF); }
-"then"   { count(); return(THEN); }
-"else"   { count(); return(ELSE); }
+"if"     { printf("br i1 \%cond, label ift, label ifnt\n"); count(); return(IF); }
+"then"   { printf("label ift\n"); count(); return(THEN); }
+"else"   { printf("label ifnt\n"); count(); return(ELSE); }
 "return" { count(); return(RETURN); }
 "class"  { count(); return(CLASS); }
 "def"    { count(); return(DEF); }
 "in"     { count(); return(IN); }
-"end"    { count(); return(END); }
+"end"    { printf("label ifend\n"); count(); return(END); }
 ".."	 { count(); return(TO); }
 "<="	 { count(); return(LEQ); }
 ">="     { count(); return(GEQ); }

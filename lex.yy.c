@@ -843,17 +843,17 @@ YY_RULE_SETUP
 case 8:
 YY_RULE_SETUP
 #line 38 "scanner.l"
-{ count(); return(IF); }
+{ printf("br i1 \%cond, label ift, label ifnt\n"); count(); return(IF); }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 39 "scanner.l"
-{ count(); return(THEN); }
+{ printf("label ift\n"); count(); return(THEN); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 40 "scanner.l"
-{ count(); return(ELSE); }
+{ printf("label ifnt\n"); count(); return(ELSE); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
@@ -878,7 +878,7 @@ YY_RULE_SETUP
 case 15:
 YY_RULE_SETUP
 #line 45 "scanner.l"
-{ count(); return(END); }
+{ printf("label ifend\n"); count(); return(END); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP

@@ -538,9 +538,9 @@ static const yytype_uint16 yyrline[] =
        0,    65,    65,    67,    68,    69,    71,    72,    73,    76,
       77,    78,    81,    82,    83,    84,    85,    87,    88,    91,
       92,    93,    95,    96,    98,   100,   101,   103,   104,   108,
-     117,   119,   125,   131,   137,   141,   142,   143,   147,   149,
-     150,   151,   152,   153,   154,   158,   160,   184,   203,   227,
-     243,   248,   249,   252,   253,   254,   255,   258,   259
+     117,   119,   125,   131,   137,   141,   142,   143,   147,   154,
+     155,   156,   157,   158,   159,   163,   165,   189,   208,   232,
+     248,   253,   254,   257,   258,   259,   260,   263,   264
 };
 #endif
 
@@ -1636,14 +1636,14 @@ yyreduce:
   case 45:
 
 /* Line 1806 of yacc.c  */
-#line 158 "parse.y"
+#line 163 "parse.y"
     {(yyval.mix) = (yyvsp[(1) - (1)].mix);}
     break;
 
   case 46:
 
 /* Line 1806 of yacc.c  */
-#line 161 "parse.y"
+#line 166 "parse.y"
     {
   (yyval.mix).nombre = reg;
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
@@ -1671,7 +1671,7 @@ yyreduce:
   case 47:
 
 /* Line 1806 of yacc.c  */
-#line 185 "parse.y"
+#line 190 "parse.y"
     {
   (yyval.mix).nombre = reg; 
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
@@ -1691,7 +1691,7 @@ yyreduce:
   case 48:
 
 /* Line 1806 of yacc.c  */
-#line 204 "parse.y"
+#line 209 "parse.y"
     {
   (yyval.mix).nombre = reg; 
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
@@ -1719,7 +1719,7 @@ yyreduce:
   case 49:
 
 /* Line 1806 of yacc.c  */
-#line 228 "parse.y"
+#line 233 "parse.y"
     {
   (yyval.mix).nombre = reg; 
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
@@ -1739,7 +1739,7 @@ yyreduce:
   case 50:
 
 /* Line 1806 of yacc.c  */
-#line 244 "parse.y"
+#line 249 "parse.y"
     {(yyval.mix) = (yyvsp[(1) - (1)].mix);}
     break;
 
@@ -1977,7 +1977,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 263 "parse.y"
+#line 268 "parse.y"
 
 int main() {
   htab = hashtab_create();

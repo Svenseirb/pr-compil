@@ -145,12 +145,12 @@ expr            : expr AND comp_expr
 
 
 comp_expr       : additive_expr '<' additive_expr
-{
+		  /*{
   $$.nombre = reg;
   $$.type = malloc(5*sizeof(char));
   $$.type = "bool";
   //printf("\%r%d = icmp ult  \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
-}
+  }*/
                 | additive_expr '>' additive_expr
                 | additive_expr LEQ additive_expr
                 | additive_expr GEQ additive_expr
