@@ -538,9 +538,9 @@ static const yytype_uint16 yyrline[] =
        0,    65,    65,    67,    68,    69,    71,    72,    73,    76,
       77,    78,    81,    82,    83,    84,    85,   101,   102,   105,
      106,   107,   109,   110,   112,   116,   117,   119,   120,   124,
-     133,   135,   141,   147,   153,   157,   158,   159,   163,   171,
-     172,   173,   174,   175,   176,   180,   182,   218,   249,   285,
-     313,   318,   319,   322,   323,   324,   325,   328,   329
+     133,   135,   141,   147,   153,   157,   158,   159,   163,   172,
+     173,   174,   175,   176,   177,   181,   183,   219,   250,   286,
+     314,   319,   320,   323,   324,   325,   326,   329,   330
 };
 #endif
 
@@ -1649,17 +1649,31 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   reg++;}
     break;
 
+  case 38:
+
+/* Line 1806 of yacc.c  */
+#line 164 "parse.y"
+    {
+  
+  (yyval.mix).nombre = reg;
+  (yyval.mix).chaine = malloc(5*sizeof(char));
+  (yyval.mix).chaine = "bool";
+  printf("\%r%d = icmp ult i32 \%r%d, \%r%d\n",reg, (yyvsp[(1) - (3)].mix).nombre, (yyvsp[(3) - (3)].mix).nombre);
+  reg++;
+  }
+    break;
+
   case 45:
 
 /* Line 1806 of yacc.c  */
-#line 180 "parse.y"
+#line 181 "parse.y"
     {}
     break;
 
   case 46:
 
 /* Line 1806 of yacc.c  */
-#line 183 "parse.y"
+#line 184 "parse.y"
     {
   (yyval.mix).nombre = reg;
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
@@ -1699,7 +1713,7 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 47:
 
 /* Line 1806 of yacc.c  */
-#line 219 "parse.y"
+#line 220 "parse.y"
     {
   (yyval.mix).nombre = reg; 
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
@@ -1731,7 +1745,7 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 48:
 
 /* Line 1806 of yacc.c  */
-#line 250 "parse.y"
+#line 251 "parse.y"
     {
   (yyval.mix).nombre = reg; 
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
@@ -1771,7 +1785,7 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 49:
 
 /* Line 1806 of yacc.c  */
-#line 286 "parse.y"
+#line 287 "parse.y"
     {
   (yyval.mix).nombre = reg; 
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
@@ -1803,14 +1817,14 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 50:
 
 /* Line 1806 of yacc.c  */
-#line 314 "parse.y"
+#line 315 "parse.y"
     {(yyval.mix) = (yyvsp[(1) - (1)].mix);}
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 1814 "y.tab.c"
+#line 1828 "y.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2041,21 +2055,21 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 333 "parse.y"
+#line 334 "parse.y"
 
 
 void print_begin() {
         puts("@str = constant [ 7 x i8 ] c\"=> %d\\0A\\00\"");
         puts("declare i32 @printf(i8*, ...)\n");
-        puts("define i32 @calcule() {");
+        puts("define i1 @calcule() {");
 }
 
 void print_end() {
-	printf("ret i32 \%r%d\n", reg-1);
+	printf("ret i1 \%r%d\n", reg-1);
         puts("}\n");
         puts("define i32 @main() {");
-        puts("\t%x = call i32 @calcule()");
-        puts("\tcall i32 (i8*, ...)* @printf(i8* getelementptr ([7 x i8]* @str, i32 0, i32 0), i32 %x)");
+        puts("\t%x = call i1 @calcule()");
+        puts("\tcall i32 (i8*, ...)* @printf(i8* getelementptr ([7 x i8]* @str, i32 0, i32 0), i1 %x)");
         puts("\tret i32 0\n}");
 }
 

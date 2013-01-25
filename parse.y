@@ -161,13 +161,14 @@ expr            : expr AND comp_expr
 
 
 comp_expr       : additive_expr '<' additive_expr
-		  /*{
-  // error("1");
+{
+  
   $$.nombre = reg;
   $$.chaine = malloc(5*sizeof(char));
   $$.chaine = "bool";
-  printf("\%r%d = icmp ult  \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
-  }*/
+  printf("\%r%d = icmp ult i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+  reg++;
+  }
 | additive_expr '>' additive_expr
                 | additive_expr LEQ additive_expr
                 | additive_expr GEQ additive_expr
@@ -335,15 +336,15 @@ term            : ';'
 void print_begin() {
         puts("@str = constant [ 7 x i8 ] c\"=> %d\\0A\\00\"");
         puts("declare i32 @printf(i8*, ...)\n");
-        puts("define i32 @calcule() {");
+        puts("define i1 @calcule() {");
 }
 
 void print_end() {
-	printf("ret i32 \%r%d\n", reg-1);
+	printf("ret i1 \%r%d\n", reg-1);
         puts("}\n");
         puts("define i32 @main() {");
-        puts("\t%x = call i32 @calcule()");
-        puts("\tcall i32 (i8*, ...)* @printf(i8* getelementptr ([7 x i8]* @str, i32 0, i32 0), i32 %x)");
+        puts("\t%x = call i1 @calcule()");
+        puts("\tcall i32 (i8*, ...)* @printf(i8* getelementptr ([7 x i8]* @str, i32 0, i32 0), i1 %x)");
         puts("\tret i32 0\n}");
 }
 
