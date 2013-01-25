@@ -536,11 +536,11 @@ static const yytype_int8 yyrhs[] =
 static const yytype_uint16 yyrline[] =
 {
        0,    65,    65,    67,    68,    69,    71,    72,    73,    76,
-      77,    78,    81,    82,    83,    84,    85,    87,    88,    91,
-      92,    93,    95,    96,    98,   100,   101,   103,   104,   108,
-     117,   119,   125,   131,   137,   141,   142,   143,   147,   154,
-     155,   156,   157,   158,   159,   163,   165,   201,   232,   268,
-     296,   301,   302,   305,   306,   307,   308,   311,   312
+      77,    78,    81,    82,    83,    84,    85,   101,   102,   105,
+     106,   107,   109,   110,   112,   116,   117,   119,   120,   124,
+     133,   135,   141,   147,   153,   157,   158,   159,   163,   171,
+     172,   173,   174,   175,   176,   180,   182,   218,   249,   285,
+     313,   318,   319,   322,   323,   324,   325,   328,   329
 };
 #endif
 
@@ -1569,22 +1569,38 @@ yyreduce:
 
 /* Line 1806 of yacc.c  */
 #line 86 "parse.y"
-    {hashtab_addreg(htab,(yyvsp[(1) - (3)].mix).chaine,reg-1); hashtab_addtype(htab,(yyvsp[(1) - (3)].mix).chaine, (yyvsp[(3) - (3)].mix).chaine); regtoid[reg-1]=strdup((yyvsp[(1) - (3)].mix).chaine);}
+    {
+  int tmpreg;
+  tmpreg = hashtab_getreg(htab, (yyvsp[(1) - (3)].mix).chaine);
+  if(tmpreg != -1){
+    if(strcmp(hashtab_gettype(htab, (yyvsp[(1) - (3)].mix).chaine),(yyvsp[(3) - (3)].mix).chaine) !=0){
+      error("Mauvais type assigne a la variable");
+    }
+    free(regtoid[tmpreg]);
+  }
+  else{ 
+    hashtab_addtype(htab,(yyvsp[(1) - (3)].mix).chaine, (yyvsp[(3) - (3)].mix).chaine); 
+  }
+  hashtab_addreg(htab,(yyvsp[(1) - (3)].mix).chaine,reg-1); 
+  regtoid[reg-1]=strdup((yyvsp[(1) - (3)].mix).chaine);
+  }
     break;
 
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 99 "parse.y"
-    {(yyval.mix).chaine = malloc(strlen((yyvsp[(1) - (1)].chaine))*sizeof(char));  idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
+#line 113 "parse.y"
+    {
+(yyval.mix).chaine = malloc(strlen((yyvsp[(1) - (1)].chaine))*sizeof(char));  
+idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
     break;
 
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 109 "parse.y"
+#line 125 "parse.y"
     {
-  idCopy((yyvsp[(1) - (1)].mix).chaine, (yyvsp[(1) - (1)].mix).chaine); 
+  idCopy((yyvsp[(1) - (1)].mix).chaine, (yyvsp[(1) - (1)].mix).chaine);
   (yyval.mix).nombre = hashtab_getreg(htab,(yyvsp[(1) - (1)].mix).chaine);
   (yyval.mix).chaine = hashtab_gettype(htab,(yyvsp[(1) - (1)].mix).chaine);
   if((yyval.mix).nombre == -1){
@@ -1596,14 +1612,14 @@ yyreduce:
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 118 "parse.y"
+#line 134 "parse.y"
     {/*$$.nombre = reg; clean_string((char *)$1); len_string = strlen((char *)$1) + 1; printf("\%r%d = internal constant [%d x i8] c\"%s\\00\"\n", reg, len_string, (char *)$1); reg++;*/}
     break;
 
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 120 "parse.y"
+#line 136 "parse.y"
     {(yyval.mix).nombre = reg;
   (yyval.mix).chaine = malloc(6*sizeof(char));
   (yyval.mix).chaine = "float"; 
@@ -1614,7 +1630,7 @@ yyreduce:
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 126 "parse.y"
+#line 142 "parse.y"
     {(yyval.mix).nombre = reg; 
   (yyval.mix).chaine = malloc(4*sizeof(char));
   (yyval.mix).chaine = "int";
@@ -1625,7 +1641,7 @@ yyreduce:
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 132 "parse.y"
+#line 148 "parse.y"
     {(yyval.mix).nombre = reg; 
   (yyval.mix).chaine = malloc(5*sizeof(char));
   (yyval.mix).chaine = "bool";
@@ -1633,29 +1649,17 @@ yyreduce:
   reg++;}
     break;
 
-  case 38:
-
-/* Line 1806 of yacc.c  */
-#line 148 "parse.y"
-    {
-  (yyval.mix).nombre = reg;
-  (yyval.mix).chaine = malloc(5*sizeof(char));
-  (yyval.mix).chaine = "bool";
-  //printf("\%r%d = icmp ult  \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
-}
-    break;
-
   case 45:
 
 /* Line 1806 of yacc.c  */
-#line 163 "parse.y"
+#line 180 "parse.y"
     {}
     break;
 
   case 46:
 
 /* Line 1806 of yacc.c  */
-#line 166 "parse.y"
+#line 183 "parse.y"
     {
   (yyval.mix).nombre = reg;
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
@@ -1695,7 +1699,7 @@ yyreduce:
   case 47:
 
 /* Line 1806 of yacc.c  */
-#line 202 "parse.y"
+#line 219 "parse.y"
     {
   (yyval.mix).nombre = reg; 
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
@@ -1727,7 +1731,7 @@ yyreduce:
   case 48:
 
 /* Line 1806 of yacc.c  */
-#line 233 "parse.y"
+#line 250 "parse.y"
     {
   (yyval.mix).nombre = reg; 
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
@@ -1767,7 +1771,7 @@ yyreduce:
   case 49:
 
 /* Line 1806 of yacc.c  */
-#line 269 "parse.y"
+#line 286 "parse.y"
     {
   (yyval.mix).nombre = reg; 
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
@@ -1799,14 +1803,14 @@ yyreduce:
   case 50:
 
 /* Line 1806 of yacc.c  */
-#line 297 "parse.y"
+#line 314 "parse.y"
     {(yyval.mix) = (yyvsp[(1) - (1)].mix);}
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 1810 "y.tab.c"
+#line 1814 "y.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2037,16 +2041,33 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 316 "parse.y"
+#line 333 "parse.y"
+
+
+void print_begin() {
+        puts("@str = constant [ 7 x i8 ] c\"=> %d\\0A\\00\"");
+        puts("declare i32 @printf(i8*, ...)\n");
+        puts("define i32 @calcule() {");
+}
+
+void print_end() {
+	printf("ret i32 \%r%d\n", reg-1);
+        puts("}\n");
+        puts("define i32 @main() {");
+        puts("\t%x = call i32 @calcule()");
+        puts("\tcall i32 (i8*, ...)* @printf(i8* getelementptr ([7 x i8]* @str, i32 0, i32 0), i32 %x)");
+        puts("\tret i32 0\n}");
+}
 
 int main() {
   htab = hashtab_create();
   regtoid = malloc(10000*sizeof(char*));
 
-  puts("define i32 @main() {");
+  print_begin();
   yyparse(); 
+  print_end();
+
   hashtab_delete(htab);
-  puts("ret i32 0\n}");
   return 0;
 }
 

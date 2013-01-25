@@ -82,8 +82,22 @@ stmt		: IF expr THEN stmts terms END
                 | IF expr THEN stmts terms ELSE stmts terms END 
                 | FOR ID IN expr TO expr term stmts terms END
                 | WHILE expr DO term stmts terms END 
-                | lhs '=' expr
-{hashtab_addreg(htab,$1.chaine,reg-1); hashtab_addtype(htab,$1.chaine, $3.chaine); regtoid[reg-1]=strdup($1.chaine);}
+| lhs '=' expr
+{
+  int tmpreg;
+  tmpreg = hashtab_getreg(htab, $1.chaine);
+  if(tmpreg != -1){
+    if(strcmp(hashtab_gettype(htab, $1.chaine),$3.chaine) !=0){
+      error("Mauvais type assigne a la variable");
+    }
+    free(regtoid[tmpreg]);
+  }
+  else{ 
+    hashtab_addtype(htab,$1.chaine, $3.chaine); 
+  }
+  hashtab_addreg(htab,$1.chaine,reg-1); 
+  regtoid[reg-1]=strdup($1.chaine);
+  }
                 | RETURN expr
                 | DEF ID opt_params term stmts terms END
 ; 
@@ -96,7 +110,9 @@ params          : ID ',' params
                 | ID
 ; 
 lhs             : ID
-{$$.chaine = malloc(strlen($1)*sizeof(char));  idCopy($1, $$.chaine);}
+{
+$$.chaine = malloc(strlen($1)*sizeof(char));  
+idCopy($1, $$.chaine);}
                 | ID '.' primary
                 | ID '(' exprs ')'
 ;
@@ -107,7 +123,7 @@ exprs           : exprs ',' expr
 
 primary         : lhs
 {
-  idCopy($1.chaine, $1.chaine); 
+  idCopy($1.chaine, $1.chaine);
   $$.nombre = hashtab_getreg(htab,$1.chaine);
   $$.chaine = hashtab_gettype(htab,$1.chaine);
   if($$.nombre == -1){
@@ -145,13 +161,14 @@ expr            : expr AND comp_expr
 
 
 comp_expr       : additive_expr '<' additive_expr
-{
+		  /*{
+  // error("1");
   $$.nombre = reg;
   $$.chaine = malloc(5*sizeof(char));
   $$.chaine = "bool";
-  //printf("\%r%d = icmp ult  \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
-}
-                | additive_expr '>' additive_expr
+  printf("\%r%d = icmp ult  \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+  }*/
+| additive_expr '>' additive_expr
                 | additive_expr LEQ additive_expr
                 | additive_expr GEQ additive_expr
                 | additive_expr EQ additive_expr
@@ -314,13 +331,30 @@ term            : ';'
 
 
 %%
+
+void print_begin() {
+        puts("@str = constant [ 7 x i8 ] c\"=> %d\\0A\\00\"");
+        puts("declare i32 @printf(i8*, ...)\n");
+        puts("define i32 @calcule() {");
+}
+
+void print_end() {
+	printf("ret i32 \%r%d\n", reg-1);
+        puts("}\n");
+        puts("define i32 @main() {");
+        puts("\t%x = call i32 @calcule()");
+        puts("\tcall i32 (i8*, ...)* @printf(i8* getelementptr ([7 x i8]* @str, i32 0, i32 0), i32 %x)");
+        puts("\tret i32 0\n}");
+}
+
 int main() {
   htab = hashtab_create();
   regtoid = malloc(10000*sizeof(char*));
 
-  puts("define i32 @main() {");
+  print_begin();
   yyparse(); 
+  print_end();
+
   hashtab_delete(htab);
-  puts("ret i32 0\n}");
   return 0;
 }

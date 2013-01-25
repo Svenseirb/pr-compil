@@ -56,8 +56,8 @@ void hashtab_addreg(Hashtab *htab, char *id, int reg){
   code %= htab->tmax;
   if(htab->tab[code].reg ==-1){
     htab->taille++;
-    htab->tab[code].reg = reg;
   }
+  htab->tab[code].reg = reg;
 }
 
 int hashtab_getreg(Hashtab *htab, char *id){
