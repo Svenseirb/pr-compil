@@ -1,13 +1,15 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "hashtab.h"
 
 Hashtab *hashtab_create_taille(int size){
   int i;
   Hashtab *htab = malloc(sizeof(Hashtab));
-  htab->tab = malloc(size*sizeof(int));
+  htab->tab = malloc(size*sizeof(Cell));
   for(i=0; i<size; i++){
-    htab->tab[i] = -1;
+    htab->tab[i].reg = -1;
+    htab->tab[i].type = NULL;
   }
   htab->tmax = size;
   htab->taille = 0;
@@ -48,20 +50,35 @@ int hash(char *id){
   return code;
 }
 
-void hashtab_add(Hashtab *htab, char *id, int reg){
+void hashtab_addreg(Hashtab *htab, char *id, int reg){
   int code = hash(id);
   code = abs(code);
   code %= htab->tmax;
-  if(htab->tab[code]==-1){
+  if(htab->tab[code].reg ==-1){
     htab->taille++;
-    htab->tab[code] = reg;
+    htab->tab[code].reg = reg;
   }
 }
 
-int hashtab_get(Hashtab *htab, char *id){
+int hashtab_getreg(Hashtab *htab, char *id){
   int code = hash(id);
   code = abs(code);
   code %= htab->tmax;
-  return htab->tab[code];
+  return htab->tab[code].reg;
 }
 
+void hashtab_addtype(Hashtab *htab, char *id, char *type){
+  int code = hash(id);
+  code = abs(code);
+  code %= htab->tmax;
+  htab->tab[code].type = strdup(type);
+}
+
+char* hashtab_gettype(Hashtab *htab, char *id){
+  int code = hash(id);
+  char *type;
+  code = abs(code);
+  code %= htab->tmax;
+  type = strdup(htab->tab[code].type);
+  return type;
+}

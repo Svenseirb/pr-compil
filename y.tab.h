@@ -53,12 +53,13 @@
      FLOAT = 271,
      INT = 272,
      ID = 273,
-     FOR = 274,
-     TO = 275,
-     RETURN = 276,
-     IN = 277,
-     NEQ = 278,
-     EQ = 279
+     BOOL = 274,
+     FOR = 275,
+     TO = 276,
+     RETURN = 277,
+     IN = 278,
+     NEQ = 279,
+     EQ = 280
    };
 #endif
 /* Tokens.  */
@@ -78,12 +79,13 @@
 #define FLOAT 271
 #define INT 272
 #define ID 273
-#define FOR 274
-#define TO 275
-#define RETURN 276
-#define IN 277
-#define NEQ 278
-#define EQ 279
+#define BOOL 274
+#define FOR 275
+#define TO 276
+#define RETURN 277
+#define IN 278
+#define NEQ 279
+#define EQ 280
 
 
 
@@ -93,17 +95,18 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 29 "parse.y"
+#line 53 "parse.y"
 
   int nombre;
   char *chaine;
+  float flotant;
   struct mix{int nombre;
   char *chaine;
 }mix;
 
 
 /* Line 2068 of yacc.c  */
-#line 107 "y.tab.h"
+#line 110 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

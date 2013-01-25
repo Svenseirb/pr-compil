@@ -28,9 +28,11 @@ I ([0-9]+)
 S (\"[^\n\"]*\")
 ID ([$@]?[a-zA-Z_][a-zA-Z_0-9]*)
 %%
-{F}      { count(); return(FLOAT); }
-{I}      {yylval =atoi(yytext); count(); return(INT); }
-{S}      { count(); return(STRING); }
+{F}      { yylval.flotant = atof(yytext); count(); return(FLOAT); }
+{I}      { yylval.nombre = atoi(yytext); count(); return(INT); }
+{S}      { yylval.chaine = strdup(yytext); count(); return(STRING); }
+"true"   { yylval.nombre = 1; count(); return(BOOL); }
+"false"  { yylval.nombre = 0; count(); return(BOOL); }
 "for"    { count(); return(FOR); }
 "while"  { count(); return(WHILE);}
 "if"     { count(); return(IF); }
@@ -60,7 +62,7 @@ ID ([$@]?[a-zA-Z_][a-zA-Z_0-9]*)
 "/"	 { count(); return('/'); }
 "<"	 { count(); return('<'); }
 ">"	 { count(); return('>'); }
-{ID}     {yylval = yytext; count(); return(ID); }
+{ID}     {yylval.chaine = yytext; count(); return(ID); }
 "\n"     { count(); lineno++; return('\n'); }
 [ \t\v\f]  { count(); }
 .        ;
