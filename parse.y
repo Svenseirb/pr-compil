@@ -53,14 +53,14 @@
 %union{
   int nombre;
   char *chaine;
-  float flotant;
+  float flottant;
   struct mix{int nombre;
   char *chaine;
 }mix;}
-%type <mix> expr multiplicative_expr additive_expr primary lhs
+%type <mix> expr multiplicative_expr additive_expr primary lhs comp_expr
 %type <nombre> INT BOOL
 %type <chaine> ID STRING
-%type <flotant> FLOAT
+%type <flottant> FLOAT
 %%
 program		:  topstmts opt_terms
 ;
@@ -132,7 +132,7 @@ primary         : lhs
 {$$.nombre = reg; 
   $$.chaine = malloc(5*sizeof(char));
   $$.chaine = "bool";
-  printf("\%r%d = add i32 0, %d\n", reg, $1); 
+  printf("\%r%d = add i1 0, %d\n", reg, $1); 
   reg++;}
 | '(' expr ')'
 ;
@@ -147,8 +147,8 @@ expr            : expr AND comp_expr
 comp_expr       : additive_expr '<' additive_expr
 {
   $$.nombre = reg;
-  $$.type = malloc(5*sizeof(char));
-  $$.type = "bool";
+  $$.chaine = malloc(5*sizeof(char));
+  $$.chaine = "bool";
   //printf("\%r%d = icmp ult  \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
 }
                 | additive_expr '>' additive_expr
@@ -160,12 +160,24 @@ comp_expr       : additive_expr '<' additive_expr
 
 ;
 additive_expr   : 
-multiplicative_expr {$$ = $1;}
+multiplicative_expr {}
 
 | additive_expr '+' multiplicative_expr 
 {
   $$.nombre = reg;
   if(strcmp($1.chaine, "float")==0 || strcmp($3.chaine, "float")==0){
+    if(strcmp($1.chaine, "int")==0){
+      int ntemp = $1.nombre;
+      $1.nombre = reg;
+      reg++;
+      printf("\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
+    }
+    if(strcmp($3.chaine, "int")==0){
+      int ntemp = $3.nombre;
+      $3.nombre = reg;
+      reg++;
+      printf("\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
+    }
     $$.chaine = malloc(6*sizeof(char));
     $$.chaine = "float"; 
     printf("\%r%d = fadd float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
@@ -173,7 +185,7 @@ multiplicative_expr {$$ = $1;}
   else if(strcmp($1.chaine, "bool")==0 && strcmp($3.chaine, "bool")==0){
     $$.chaine = malloc(4*sizeof(char));
     $$.chaine = "bool";
-    printf("\%r%d = or i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+    printf("\%r%d = or i1 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
   }
   else if(strcmp($1.chaine, "bool")==0 ||  strcmp($3.chaine, "bool")==0){
     error("addition d'un booleen avec un autre type");
@@ -190,6 +202,18 @@ multiplicative_expr {$$ = $1;}
 {
   $$.nombre = reg; 
   if(strcmp($1.chaine, "float")==0 || strcmp($3.chaine, "float")==0){
+    if(strcmp($1.chaine, "int")==0){
+      int ntemp = $1.nombre;
+      $1.nombre = reg;
+      reg++;
+      printf("\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
+    }
+    if(strcmp($3.chaine, "int")==0){
+      int ntemp = $3.nombre;
+      $3.nombre = reg;
+      reg++;
+      printf("\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
+    }
     $$.chaine = malloc(6*sizeof(char));
     $$.chaine = "float"; 
     printf("\%r%d = fsub float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
@@ -209,6 +233,18 @@ multiplicative_expr '*' primary
 {
   $$.nombre = reg; 
   if(strcmp($1.chaine, "float")==0 || strcmp($3.chaine, "float")==0){
+    if(strcmp($1.chaine, "int")==0){
+      int ntemp = $1.nombre;
+      $1.nombre = reg;
+      reg++;
+      printf("\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
+    }
+    if(strcmp($3.chaine, "int")==0){
+      int ntemp = $3.nombre;
+      $3.nombre = reg;
+      reg++;
+      printf("\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
+    }
     $$.chaine = malloc(6*sizeof(char));
     $$.chaine = "float"; 
     printf("\%r%d = fmul float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
@@ -216,7 +252,7 @@ multiplicative_expr '*' primary
   else if(strcmp($1.chaine, "bool")==0 && strcmp($3.chaine, "bool")==0){
     $$.chaine = malloc(4*sizeof(char));
     $$.chaine = "bool";
-    printf("\%r%d = and i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+    printf("\%r%d = and i1 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
   }
   else if(strcmp($1.chaine, "bool")==0 ||  strcmp($3.chaine, "bool")==0){
     error("multiplication d'un booleen avec un autre type");
@@ -233,6 +269,18 @@ multiplicative_expr '*' primary
 {
   $$.nombre = reg; 
   if(strcmp($1.chaine, "float")==0 || strcmp($3.chaine, "float")==0){
+    if(strcmp($1.chaine, "int")==0){
+      int ntemp = $1.nombre;
+      $1.nombre = reg;
+      reg++;
+      printf("\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
+    }
+    if(strcmp($3.chaine, "int")==0){
+      int ntemp = $3.nombre;
+      $3.nombre = reg;
+      reg++;
+      printf("\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
+    }
     $$.chaine = malloc(6*sizeof(char));
     $$.chaine = "float"; 
     printf("\%r%d = fdiv float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
@@ -269,7 +317,10 @@ term            : ';'
 int main() {
   htab = hashtab_create();
   regtoid = malloc(10000*sizeof(char*));
+
+  puts("define i32 @main() {");
   yyparse(); 
   hashtab_delete(htab);
+  puts("ret i32 0\n}");
   return 0;
 }
