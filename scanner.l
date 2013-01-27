@@ -36,6 +36,7 @@ ID ([$@]?[a-zA-Z_][a-zA-Z_0-9]*)
 "false"  { yylval.nombre = 0; count(); return(BOOL); }
 "for"    { count(); return(FOR); }
 "while"  { count(); return(WHILE);}
+"do"     { count(); return(DO);}
 "if"     { count(); return(IF); }
 "then"   { count(); return(THEN); }
 "else"   { count(); return(ELSE); }

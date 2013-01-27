@@ -89,10 +89,9 @@ stmts	        : /* none */
                 ;
 
 then            : THEN
-
 { 
   flush();
-  flow.haselse = 0;
+  flow.type = 0;
   flow.id = curFlow;
   push(flowStack, flow);
   printf("br i1 \%r%d, label %cift%d, label %cifnt%d\n", reg-1, '%',curFlow,'%',curFlow);
@@ -105,11 +104,16 @@ end             : END
 {   
   flow = pop(flowStack);
   flush();
-  if(flow.haselse == 0){
+  switch(flow.type){
+  case 0:
     printf("ifnt%d:\n",flow.id);
-  }
-  else{
+    break;
+  case 1:
     printf("ifend%d:\n",flow.id);
+    break;
+  case 3:
+    printf("br i1 \%r%d, label %cbeg%d, label %cend%d\n", flow.reg, '%',flow.id,'%',flow.id);
+    printf("end%d:\n",flow.id);
   }
 }
 ;
@@ -120,20 +124,34 @@ else            : ELSE
   flush();
   printf("br i1 1, label %cifend%d, label %cifnt%d\n", '%',flow.id, '%', flow.id);
   printf("ifnt%d:\n",flow.id);
-  flow.haselse = 1;
+  flow.type = 1;
   push(flowStack, flow);
 }
   
-
+do              : DO
+{
+  flush();
+  flow.type = 3;
+  flow.id = curFlow;
+  flow.reg = 4;
+  printf("%d\n",flow.reg);
+  push(flowStack, flow);
+  flow = top(flowStack);
+  printf("%d\n",flow.reg);
+  printf("br i1 \%r%d, label %cbeg%d, label %cend%d\n", reg-1, '%',curFlow,'%',curFlow);
+  printf("beg%d:\n", curFlow);
+  curFlow++;
+}
 
 stmt		: 
 IF expr then stmts terms end
-{
-  }
 
-                | IF expr then stmts terms else stmts terms end 
-                | FOR ID IN expr TO expr term stmts terms END
-                | WHILE expr DO term stmts terms END 
+| IF expr then stmts terms else stmts terms end 
+
+| FOR ID IN expr TO expr term stmts terms end
+
+| WHILE expr do term stmts terms end
+
 | lhs '=' expr
 {
   flush();
