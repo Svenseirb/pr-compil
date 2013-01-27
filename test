@@ -1,10 +1,16 @@
 a = 6
 b = 7
+bool = false
 if a < b then
+if b > 3 then
 b = 4
 c = 2
+end
 a = b + c
 else
 b = 2
 bool = true
+end
+if bool then
+b = 6
 end

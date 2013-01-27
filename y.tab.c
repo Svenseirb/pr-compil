@@ -72,6 +72,7 @@
   #include <string.h>
   #include "y.tab.h"
   #include "hashtab/hashtab.h"
+  #include "stack/stack.h"
   #include "parse.h"
   #include <stdlib.h>
 
@@ -79,7 +80,9 @@
   Hashtab *htab;
   char **regtoid;
   char *buff;
-  int haselse = 0;
+  int curFlow;
+  Stack **flowStack;
+  Flow flow;
 
   void idCopy(char * src, char *dest){
     int i = 0;
@@ -115,13 +118,13 @@
     strcat(errmsg, msg);
     strcat(errmsg, "\n");
     write(2, errmsg, len);
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
 
 
 /* Line 268 of yacc.c  */
-#line 125 "y.tab.c"
+#line 128 "y.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -206,7 +209,7 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 60 "parse.y"
+#line 63 "parse.y"
 
   int nombre;
   char *chaine;
@@ -217,7 +220,7 @@ typedef union YYSTYPE
 
 
 /* Line 293 of yacc.c  */
-#line 221 "y.tab.c"
+#line 224 "y.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -229,7 +232,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 233 "y.tab.c"
+#line 236 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -544,13 +547,13 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    72,    72,    74,    75,    76,    78,    79,    80,    83,
-      84,    85,    88,    97,   110,   121,   125,   126,   127,   128,
-     145,   146,   149,   150,   151,   153,   154,   156,   160,   161,
-     163,   164,   168,   177,   179,   185,   191,   197,   201,   202,
-     203,   207,   233,   259,   285,   312,   339,   365,   369,   371,
-     407,   438,   474,   502,   507,   508,   511,   512,   513,   514,
-     517,   518
+       0,    75,    75,    77,    78,    79,    81,    82,    83,    86,
+      87,    88,    91,   104,   117,   130,   134,   135,   136,   137,
+     154,   155,   158,   159,   160,   162,   163,   165,   169,   170,
+     172,   173,   177,   186,   188,   194,   200,   206,   210,   211,
+     212,   216,   242,   268,   294,   321,   348,   374,   378,   380,
+     416,   447,   483,   511,   516,   517,   520,   521,   522,   523,
+     526,   527
 };
 #endif
 
@@ -1581,46 +1584,52 @@ yyreduce:
         case 12:
 
 /* Line 1806 of yacc.c  */
-#line 90 "parse.y"
+#line 93 "parse.y"
     { 
   flush();
-  printf("br i1 \%r%d, label %cift, label %cifnt\n", reg-1, '%','%');
-  printf("ift:\n");
+  flow.haselse = 0;
+  flow.id = curFlow;
+  push(flowStack, flow);
+  printf("br i1 \%r%d, label %cift%d, label %cifnt%d\n", reg-1, '%',curFlow,'%',curFlow);
+  printf("ift%d:\n", curFlow);
+  curFlow++;
 }
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 98 "parse.y"
+#line 105 "parse.y"
     {   
-   flush();
-   if(haselse == 0){
-     printf("ifnt:\n");
-   }
-   else{
-     haselse = 0;
-     printf("ifend:\n");
-   }
+  flow = pop(flowStack);
+  flush();
+  if(flow.haselse == 0){
+    printf("ifnt%d:\n",flow.id);
+  }
+  else{
+    printf("ifend%d:\n",flow.id);
+  }
 }
     break;
 
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 111 "parse.y"
+#line 118 "parse.y"
     {
+  flow = pop(flowStack);
   flush();
-  printf("br i1 1, label %cifend, label %cifnt\n", '%', '%');
-  printf("ifnt:\n");
-  haselse = 1;
+  printf("br i1 1, label %cifend%d, label %cifnt%d\n", '%',flow.id, '%', flow.id);
+  printf("ifnt%d:\n",flow.id);
+  flow.haselse = 1;
+  push(flowStack, flow);
 }
     break;
 
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 122 "parse.y"
+#line 131 "parse.y"
     {
   }
     break;
@@ -1628,7 +1637,7 @@ yyreduce:
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 129 "parse.y"
+#line 138 "parse.y"
     {
   flush();
   int tmpreg;
@@ -1650,7 +1659,7 @@ yyreduce:
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 157 "parse.y"
+#line 166 "parse.y"
     {
 (yyval.mix).chaine = malloc(strlen((yyvsp[(1) - (1)].chaine))*sizeof(char));  
 idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
@@ -1659,7 +1668,7 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 169 "parse.y"
+#line 178 "parse.y"
     {
   idCopy((yyvsp[(1) - (1)].mix).chaine, (yyvsp[(1) - (1)].mix).chaine);
   (yyval.mix).nombre = hashtab_getreg(htab,(yyvsp[(1) - (1)].mix).chaine);
@@ -1673,14 +1682,14 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 178 "parse.y"
+#line 187 "parse.y"
     {/*$$.nombre = reg; clean_string((char *)$1); len_string = strlen((char *)$1) + 1; printf("\%r%d = internal constant [%d x i8] c\"%s\\00\"\n", reg, len_string, (char *)$1); reg++;*/}
     break;
 
   case 34:
 
 /* Line 1806 of yacc.c  */
-#line 180 "parse.y"
+#line 189 "parse.y"
     {(yyval.mix).nombre = reg;
   (yyval.mix).chaine = malloc(6*sizeof(char));
   (yyval.mix).chaine = "float"; 
@@ -1691,7 +1700,7 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 35:
 
 /* Line 1806 of yacc.c  */
-#line 186 "parse.y"
+#line 195 "parse.y"
     {(yyval.mix).nombre = reg; 
   (yyval.mix).chaine = malloc(4*sizeof(char));
   (yyval.mix).chaine = "int";
@@ -1702,7 +1711,7 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 36:
 
 /* Line 1806 of yacc.c  */
-#line 192 "parse.y"
+#line 201 "parse.y"
     {(yyval.mix).nombre = reg; 
   (yyval.mix).chaine = malloc(5*sizeof(char));
   (yyval.mix).chaine = "bool";
@@ -1713,7 +1722,7 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 41:
 
 /* Line 1806 of yacc.c  */
-#line 208 "parse.y"
+#line 217 "parse.y"
     {  
   (yyval.mix).nombre = reg;
   (yyval.mix).chaine = malloc(5*sizeof(char));
@@ -1743,7 +1752,7 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 42:
 
 /* Line 1806 of yacc.c  */
-#line 234 "parse.y"
+#line 243 "parse.y"
     {  
   (yyval.mix).nombre = reg;
   (yyval.mix).chaine = malloc(5*sizeof(char));
@@ -1773,7 +1782,7 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 43:
 
 /* Line 1806 of yacc.c  */
-#line 260 "parse.y"
+#line 269 "parse.y"
     {  
   (yyval.mix).nombre = reg;
   (yyval.mix).chaine = malloc(5*sizeof(char));
@@ -1803,7 +1812,7 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 44:
 
 /* Line 1806 of yacc.c  */
-#line 286 "parse.y"
+#line 295 "parse.y"
     {  
   (yyval.mix).nombre = reg;
   (yyval.mix).chaine = malloc(5*sizeof(char));
@@ -1833,7 +1842,7 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 45:
 
 /* Line 1806 of yacc.c  */
-#line 313 "parse.y"
+#line 322 "parse.y"
     {  
   (yyval.mix).nombre = reg;
   (yyval.mix).chaine = malloc(5*sizeof(char));
@@ -1863,7 +1872,7 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 46:
 
 /* Line 1806 of yacc.c  */
-#line 340 "parse.y"
+#line 349 "parse.y"
     {  
   (yyval.mix).nombre = reg;
   (yyval.mix).chaine = malloc(5*sizeof(char));
@@ -1893,14 +1902,14 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 48:
 
 /* Line 1806 of yacc.c  */
-#line 369 "parse.y"
+#line 378 "parse.y"
     {}
     break;
 
   case 49:
 
 /* Line 1806 of yacc.c  */
-#line 372 "parse.y"
+#line 381 "parse.y"
     {
   (yyval.mix).nombre = reg;
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
@@ -1940,7 +1949,7 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 50:
 
 /* Line 1806 of yacc.c  */
-#line 408 "parse.y"
+#line 417 "parse.y"
     {
   (yyval.mix).nombre = reg; 
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
@@ -1972,7 +1981,7 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 51:
 
 /* Line 1806 of yacc.c  */
-#line 439 "parse.y"
+#line 448 "parse.y"
     {
   (yyval.mix).nombre = reg; 
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
@@ -2012,7 +2021,7 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 52:
 
 /* Line 1806 of yacc.c  */
-#line 475 "parse.y"
+#line 484 "parse.y"
     {
   (yyval.mix).nombre = reg; 
   if(strcmp((yyvsp[(1) - (3)].mix).chaine, "float")==0 || strcmp((yyvsp[(3) - (3)].mix).chaine, "float")==0){
@@ -2044,14 +2053,14 @@ idCopy((yyvsp[(1) - (1)].chaine), (yyval.mix).chaine);}
   case 53:
 
 /* Line 1806 of yacc.c  */
-#line 503 "parse.y"
+#line 512 "parse.y"
     {(yyval.mix) = (yyvsp[(1) - (1)].mix);}
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 2055 "y.tab.c"
+#line 2064 "y.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2282,7 +2291,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 522 "parse.y"
+#line 531 "parse.y"
 
 
 void print_begin() {
@@ -2304,11 +2313,14 @@ int main() {
   htab = hashtab_create();
   regtoid = malloc(4096*sizeof(char*));
   buff = malloc(16384*sizeof(char));
+  flowStack = malloc(sizeof(Stack*));
+  stack_create(flowStack);
 
   print_begin();
   yyparse(); 
   print_end();
 
+  free(flowStack);
   free(regtoid);
   free(buff);
   hashtab_delete(htab);

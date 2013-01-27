@@ -3,6 +3,7 @@
   #include <string.h>
   #include "y.tab.h"
   #include "hashtab/hashtab.h"
+  #include "stack/stack.h"
   #include "parse.h"
   #include <stdlib.h>
 
@@ -10,7 +11,9 @@
   Hashtab *htab;
   char **regtoid;
   char *buff;
-  int haselse = 0;
+  int curFlow;
+  Stack **flowStack;
+  Flow flow;
 
   void idCopy(char * src, char *dest){
     int i = 0;
@@ -46,7 +49,7 @@
     strcat(errmsg, msg);
     strcat(errmsg, "\n");
     write(2, errmsg, len);
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
 %}
@@ -89,30 +92,36 @@ then            : THEN
 
 { 
   flush();
-  printf("br i1 \%r%d, label %cift, label %cifnt\n", reg-1, '%','%');
-  printf("ift:\n");
+  flow.haselse = 0;
+  flow.id = curFlow;
+  push(flowStack, flow);
+  printf("br i1 \%r%d, label %cift%d, label %cifnt%d\n", reg-1, '%',curFlow,'%',curFlow);
+  printf("ift%d:\n", curFlow);
+  curFlow++;
 }
 ;
 
 end             : END
 {   
-   flush();
-   if(haselse == 0){
-     printf("ifnt:\n");
-   }
-   else{
-     haselse = 0;
-     printf("ifend:\n");
-   }
+  flow = pop(flowStack);
+  flush();
+  if(flow.haselse == 0){
+    printf("ifnt%d:\n",flow.id);
+  }
+  else{
+    printf("ifend%d:\n",flow.id);
+  }
 }
 ;
 
 else            : ELSE
 {
+  flow = pop(flowStack);
   flush();
-  printf("br i1 1, label %cifend, label %cifnt\n", '%', '%');
-  printf("ifnt:\n");
-  haselse = 1;
+  printf("br i1 1, label %cifend%d, label %cifnt%d\n", '%',flow.id, '%', flow.id);
+  printf("ifnt%d:\n",flow.id);
+  flow.haselse = 1;
+  push(flowStack, flow);
 }
   
 
@@ -540,11 +549,14 @@ int main() {
   htab = hashtab_create();
   regtoid = malloc(4096*sizeof(char*));
   buff = malloc(16384*sizeof(char));
+  flowStack = malloc(sizeof(Stack*));
+  stack_create(flowStack);
 
   print_begin();
   yyparse(); 
   print_end();
 
+  free(flowStack);
   free(regtoid);
   free(buff);
   hashtab_delete(htab);

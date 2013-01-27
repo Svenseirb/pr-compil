@@ -95,7 +95,7 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 60 "parse.y"
+#line 63 "parse.y"
 
   int nombre;
   char *chaine;
