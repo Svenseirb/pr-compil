@@ -95,11 +95,11 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 53 "parse.y"
+#line 60 "parse.y"
 
   int nombre;
   char *chaine;
-  float flottant;
+  float flotant;
   struct mix{int nombre;
   char *chaine;
 }mix;

@@ -3,11 +3,14 @@
   #include <string.h>
   #include "y.tab.h"
   #include "hashtab/hashtab.h"
+  #include "parse.h"
   #include <stdlib.h>
 
   int reg = 0;
   Hashtab *htab;
   char **regtoid;
+  char *buff;
+  int haselse = 0;
 
   void idCopy(char * src, char *dest){
     int i = 0;
@@ -18,6 +21,10 @@
     dest[i] = '\0';
   }
 
+  void flush(){
+    printf("%s", buff);
+    buff[0] = '\0';
+  }
 
   int len_string = 0;
 
@@ -53,14 +60,14 @@
 %union{
   int nombre;
   char *chaine;
-  float flottant;
+  float flotant;
   struct mix{int nombre;
   char *chaine;
 }mix;}
 %type <mix> expr multiplicative_expr additive_expr primary lhs comp_expr
 %type <nombre> INT BOOL
 %type <chaine> ID STRING
-%type <flottant> FLOAT
+%type <flotant> FLOAT
 %%
 program		:  topstmts opt_terms
 ;
@@ -78,12 +85,49 @@ stmts	        : /* none */
                 | stmts terms stmt
                 ;
 
-stmt		: IF expr THEN stmts terms END
-                | IF expr THEN stmts terms ELSE stmts terms END 
+then            : THEN
+
+{ 
+  flush();
+  printf("br i1 \%r%d, label %cift, label %cifnt\n", reg-1, '%','%');
+  printf("ift:\n");
+}
+;
+
+end             : END
+{   
+   flush();
+   if(haselse == 0){
+     printf("ifnt:\n");
+   }
+   else{
+     haselse = 0;
+     printf("ifend:\n");
+   }
+}
+;
+
+else            : ELSE
+{
+  flush();
+  printf("br i1 1, label %cifend, label %cifnt\n", '%', '%');
+  printf("ifnt:\n");
+  haselse = 1;
+}
+  
+
+
+stmt		: 
+IF expr then stmts terms end
+{
+  }
+
+                | IF expr then stmts terms else stmts terms end 
                 | FOR ID IN expr TO expr term stmts terms END
                 | WHILE expr DO term stmts terms END 
 | lhs '=' expr
 {
+  flush();
   int tmpreg;
   tmpreg = hashtab_getreg(htab, $1.chaine);
   if(tmpreg != -1){
@@ -136,19 +180,19 @@ primary         : lhs
 {$$.nombre = reg;
   $$.chaine = malloc(6*sizeof(char));
   $$.chaine = "float"; 
-  printf("\%r%d = fadd float 0.0, %f\n", reg, $1); 
+  sprintf(&buff[strlen(buff)],"\%r%d = fadd float 0.0, %f\n", reg, $1); 
   reg++;}
 | INT
 {$$.nombre = reg; 
   $$.chaine = malloc(4*sizeof(char));
   $$.chaine = "int";
-  printf("\%r%d = add i32 0, %d\n", reg, $1); 
+  sprintf(&buff[strlen(buff)],"\%r%d = add i32 0, %d\n", reg, $1); 
   reg++;}
 | BOOL
 {$$.nombre = reg; 
   $$.chaine = malloc(5*sizeof(char));
   $$.chaine = "bool";
-  printf("\%r%d = add i1 0, %d\n", reg, $1); 
+  sprintf(&buff[strlen(buff)],"\%r%d = add i1 0, %d\n", reg, $1); 
   reg++;}
 | '(' expr ')'
 ;
@@ -161,22 +205,166 @@ expr            : expr AND comp_expr
 
 
 comp_expr       : additive_expr '<' additive_expr
-{
-  
+{  
   $$.nombre = reg;
   $$.chaine = malloc(5*sizeof(char));
   $$.chaine = "bool";
-  printf("\%r%d = icmp ult i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
-  reg++;
+  if(strcmp($1.chaine, "float") == 0 || strcmp($1.chaine, "float") == 0){
+    if(strcmp($1.chaine, "int")==0){
+      int ntemp = $1.nombre;
+      $1.nombre = reg;
+      reg++;
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
+    }
+    if(strcmp($3.chaine, "int")==0){
+      int ntemp = $3.nombre;
+      $3.nombre = reg;
+      reg++;
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
+    }
+   sprintf(&buff[strlen(buff)],"\%r%d = fcmp olt float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
   }
-| additive_expr '>' additive_expr
-                | additive_expr LEQ additive_expr
-                | additive_expr GEQ additive_expr
-                | additive_expr EQ additive_expr
-                | additive_expr NEQ additive_expr
-                | additive_expr
+  else{
+    sprintf(&buff[strlen(buff)],"\%r%d = icmp slt i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+  }
+  reg++;
+}
 
+| additive_expr '>' additive_expr
+{  
+  $$.nombre = reg;
+  $$.chaine = malloc(5*sizeof(char));
+  $$.chaine = "bool";
+  if(strcmp($1.chaine, "float") == 0 || strcmp($1.chaine, "float") == 0){
+    if(strcmp($1.chaine, "int")==0){
+      int ntemp = $1.nombre;
+      $1.nombre = reg;
+      reg++;
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
+    }
+    if(strcmp($3.chaine, "int")==0){
+      int ntemp = $3.nombre;
+      $3.nombre = reg;
+      reg++;
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
+    }
+    sprintf(&buff[strlen(buff)],"\%r%d = fcmp ogt float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+  }
+  else{
+    sprintf(&buff[strlen(buff)],"\%r%d = icmp sgt i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+  }
+  reg++;
+}
+
+| additive_expr LEQ additive_expr
+{  
+  $$.nombre = reg;
+  $$.chaine = malloc(5*sizeof(char));
+  $$.chaine = "bool";
+  if(strcmp($1.chaine, "float") == 0 || strcmp($1.chaine, "float") == 0){
+    if(strcmp($1.chaine, "int")==0){
+      int ntemp = $1.nombre;
+      $1.nombre = reg;
+      reg++;
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
+    }
+    if(strcmp($3.chaine, "int")==0){
+      int ntemp = $3.nombre;
+      $3.nombre = reg;
+      reg++;
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
+    }
+    sprintf(&buff[strlen(buff)],"\%r%d = fcmp ole float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+  }
+  else{
+    sprintf(&buff[strlen(buff)],"\%r%d = icmp sle i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+  }
+  reg++;
+}
+
+| additive_expr GEQ additive_expr
+{  
+  $$.nombre = reg;
+  $$.chaine = malloc(5*sizeof(char));
+  $$.chaine = "bool";
+  if(strcmp($1.chaine, "float") == 0 || strcmp($1.chaine, "float") == 0){
+    if(strcmp($1.chaine, "int")==0){
+      int ntemp = $1.nombre;
+      $1.nombre = reg;
+      reg++;
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
+    }
+    if(strcmp($3.chaine, "int")==0){
+      int ntemp = $3.nombre;
+      $3.nombre = reg;
+      reg++;
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
+    }
+    sprintf(&buff[strlen(buff)],"\%r%d = fcmp oge float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+  }
+  else{
+    sprintf(&buff[strlen(buff)],"\%r%d = icmp sge i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+  }
+  reg++;
+}
+
+
+| additive_expr EQ additive_expr
+{  
+  $$.nombre = reg;
+  $$.chaine = malloc(5*sizeof(char));
+  $$.chaine = "bool";
+  if(strcmp($1.chaine, "float") == 0 || strcmp($1.chaine, "float") == 0){
+    if(strcmp($1.chaine, "int")==0){
+      int ntemp = $1.nombre;
+      $1.nombre = reg;
+      reg++;
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
+    }
+    if(strcmp($3.chaine, "int")==0){
+      int ntemp = $3.nombre;
+      $3.nombre = reg;
+      reg++;
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
+    }
+    sprintf(&buff[strlen(buff)],"\%r%d = fcmp oeq float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+  }
+  else{
+    sprintf(&buff[strlen(buff)],"\%r%d = icmp eq i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+  }
+  reg++;
+}
+
+
+| additive_expr NEQ additive_expr
+{  
+  $$.nombre = reg;
+  $$.chaine = malloc(5*sizeof(char));
+  $$.chaine = "bool";
+  if(strcmp($1.chaine, "float") == 0 || strcmp($1.chaine, "float") == 0){
+    if(strcmp($1.chaine, "int")==0){
+      int ntemp = $1.nombre;
+      $1.nombre = reg;
+      reg++;
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
+    }
+    if(strcmp($3.chaine, "int")==0){
+      int ntemp = $3.nombre;
+      $3.nombre = reg;
+      reg++;
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
+    }
+    sprintf(&buff[strlen(buff)],"\%r%d = fcmp one float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+  }
+  else{
+    sprintf(&buff[strlen(buff)],"\%r%d = icmp ne i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+  }
+  reg++;
+}
+
+| additive_expr
 ;
+
 additive_expr   : 
 multiplicative_expr {}
 
@@ -188,22 +376,22 @@ multiplicative_expr {}
       int ntemp = $1.nombre;
       $1.nombre = reg;
       reg++;
-      printf("\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
     }
     if(strcmp($3.chaine, "int")==0){
       int ntemp = $3.nombre;
       $3.nombre = reg;
       reg++;
-      printf("\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
     }
     $$.chaine = malloc(6*sizeof(char));
     $$.chaine = "float"; 
-    printf("\%r%d = fadd float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+    sprintf(&buff[strlen(buff)],"\%r%d = fadd float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
   }
   else if(strcmp($1.chaine, "bool")==0 && strcmp($3.chaine, "bool")==0){
     $$.chaine = malloc(4*sizeof(char));
     $$.chaine = "bool";
-    printf("\%r%d = or i1 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+    sprintf(&buff[strlen(buff)],"\%r%d = or i1 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
   }
   else if(strcmp($1.chaine, "bool")==0 ||  strcmp($3.chaine, "bool")==0){
     error("addition d'un booleen avec un autre type");
@@ -211,7 +399,7 @@ multiplicative_expr {}
   else{
     $$.chaine = malloc(4*sizeof(char));
     $$.chaine = "int"; 
-    printf("\%r%d = add i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre); 
+    sprintf(&buff[strlen(buff)],"\%r%d = add i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre); 
   }
   reg++;
 }
@@ -224,22 +412,22 @@ multiplicative_expr {}
       int ntemp = $1.nombre;
       $1.nombre = reg;
       reg++;
-      printf("\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
     }
     if(strcmp($3.chaine, "int")==0){
       int ntemp = $3.nombre;
       $3.nombre = reg;
       reg++;
-      printf("\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
     }
     $$.chaine = malloc(6*sizeof(char));
     $$.chaine = "float"; 
-    printf("\%r%d = fsub float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+    sprintf(&buff[strlen(buff)],"\%r%d = fsub float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
   }
   else{
     $$.chaine = malloc(4*sizeof(char));
     $$.chaine = "int"; 
-    printf("\%r%d = sub i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre); 
+    sprintf(&buff[strlen(buff)],"\%r%d = sub i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre); 
   }
   reg++;
 }
@@ -255,22 +443,22 @@ multiplicative_expr '*' primary
       int ntemp = $1.nombre;
       $1.nombre = reg;
       reg++;
-      printf("\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
     }
     if(strcmp($3.chaine, "int")==0){
       int ntemp = $3.nombre;
       $3.nombre = reg;
       reg++;
-      printf("\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
     }
     $$.chaine = malloc(6*sizeof(char));
     $$.chaine = "float"; 
-    printf("\%r%d = fmul float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+    sprintf(&buff[strlen(buff)],"\%r%d = fmul float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
   }
   else if(strcmp($1.chaine, "bool")==0 && strcmp($3.chaine, "bool")==0){
     $$.chaine = malloc(4*sizeof(char));
     $$.chaine = "bool";
-    printf("\%r%d = and i1 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+    sprintf(&buff[strlen(buff)],"\%r%d = and i1 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
   }
   else if(strcmp($1.chaine, "bool")==0 ||  strcmp($3.chaine, "bool")==0){
     error("multiplication d'un booleen avec un autre type");
@@ -278,7 +466,7 @@ multiplicative_expr '*' primary
   else{
     $$.chaine = malloc(4*sizeof(char));
     $$.chaine = "int"; 
-    printf("\%r%d = mul i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre); 
+    sprintf(&buff[strlen(buff)],"\%r%d = mul i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre); 
   }
   reg++;
 }
@@ -291,22 +479,22 @@ multiplicative_expr '*' primary
       int ntemp = $1.nombre;
       $1.nombre = reg;
       reg++;
-      printf("\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$1.nombre, ntemp);
     }
     if(strcmp($3.chaine, "int")==0){
       int ntemp = $3.nombre;
       $3.nombre = reg;
       reg++;
-      printf("\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
+      sprintf(&buff[strlen(buff)],"\%r%d = sitofp i32 \%r%d to float\n",$3.nombre, ntemp);
     }
     $$.chaine = malloc(6*sizeof(char));
     $$.chaine = "float"; 
-    printf("\%r%d = fdiv float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
+    sprintf(&buff[strlen(buff)],"\%r%d = fdiv float \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre);
   }
   else{
     $$.chaine = malloc(4*sizeof(char));
     $$.chaine = "int"; 
-    printf("\%r%d = sdiv i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre); 
+    sprintf(&buff[strlen(buff)],"\%r%d = sdiv i32 \%r%d, \%r%d\n",reg, $1.nombre, $3.nombre); 
   }
   reg++;
 }
@@ -350,12 +538,15 @@ void print_end() {
 
 int main() {
   htab = hashtab_create();
-  regtoid = malloc(10000*sizeof(char*));
+  regtoid = malloc(4096*sizeof(char*));
+  buff = malloc(16384*sizeof(char));
 
   print_begin();
   yyparse(); 
   print_end();
 
+  free(regtoid);
+  free(buff);
   hashtab_delete(htab);
   return 0;
 }

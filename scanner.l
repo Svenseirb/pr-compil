@@ -3,6 +3,7 @@
 #include <string.h>
 #include "y.tab.h"
 
+
 int column=0; int lineno=0;
 
 /* Function that counts the current column */
@@ -35,14 +36,15 @@ ID ([$@]?[a-zA-Z_][a-zA-Z_0-9]*)
 "false"  { yylval.nombre = 0; count(); return(BOOL); }
 "for"    { count(); return(FOR); }
 "while"  { count(); return(WHILE);}
-"if"     { printf("br i1 \%cond, label ift, label ifnt\n"); count(); return(IF); }
-"then"   { printf("label ift\n"); count(); return(THEN); }
-"else"   { printf("label ifnt\n"); count(); return(ELSE); }
+"if"     { count(); return(IF); }
+"then"   { count(); return(THEN); }
+"else"   { count(); return(ELSE); }
 "return" { count(); return(RETURN); }
 "class"  { count(); return(CLASS); }
 "def"    { count(); return(DEF); }
 "in"     { count(); return(IN); }
-"end"    { printf("label ifend\n"); count(); return(END); }
+"end"    { count(); 
+	   return(END); }
 ".."	 { count(); return(TO); }
 "<="	 { count(); return(LEQ); }
 ">="     { count(); return(GEQ); }
